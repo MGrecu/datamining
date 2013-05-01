@@ -15,8 +15,20 @@ public class SVM {
    * Instantiates an SVM from a list of training instances, for a given
    * learning rate 'eta' and regularization parameter 'lambda'.
    */
-  public SVM(List<TrainingInstance> trainingSet, double lambda, double eta) {
-    // TODO: Implement me!
+  public SVM(List<TrainingInstance> trainingSet, double eta, double lambda) {
+	  int dim = trainingSet.get(0).getFeatures().getDimension();
+	  this.weights = new RealVector(dim);
+	  int t = 0;
+	  
+	  for (TrainingInstance ti: trainingSet) {
+		  t++;
+		  if (weights.dotProduct(ti.getFeatures()) * ti.getLabel() < 1) {
+			  weights.add(ti.getFeatures().scale((1.0/Math.sqrt(t)) * ti.getLabel()));
+			  //weights.add(ti.getFeatures().scale(eta * ti.getLabel()));
+			  double factor = Math.min(1.0, 1.0 / (weights.getNorm() * lambda));
+			  weights.scaleThis(factor);
+		  }
+	  }
   }
 
   /**
@@ -29,6 +41,8 @@ public class SVM {
       double coef = sc.nextDouble();
       ll.add(coef);
     }
+    
+    sc.close();
 
     double[] weights = new double[ll.size()];
     int cnt = 0;

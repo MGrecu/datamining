@@ -9,16 +9,21 @@ import java.util.*;
 
 public class PSGD {
 
+  public static final int K = 10;
+	
   /**
    * The Map class has to make sure that the data is shuffled to the various machines.
    */
   public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, LongWritable, Text> {
-    final int K = 10;
-
+    
     /**
      * Spread the data around on K different machines.
      */
     public void map(LongWritable key, Text value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
+    	
+    	long bucket = Math.abs(value.toString().hashCode()) % K;
+    	
+    	output.collect(new LongWritable(bucket), value);
     }
   }
 
@@ -27,7 +32,7 @@ public class PSGD {
    */
   public static class Reduce extends MapReduceBase implements Reducer<LongWritable, Text, NullWritable, Text> {
 	final static double LEARNING_RATE = 0.89;
-	final static double LAMBDA = 0.23;
+	final static double LAMBDA = 0.1;
 
 	Text outputValue = new Text();
 
@@ -70,6 +75,8 @@ public class PSGD {
 
     conf.setInputFormat(TextInputFormat.class);
     conf.setOutputFormat(TextOutputFormat.class);
+    
+    conf.setNumReduceTasks(K);
 
     FileInputFormat.setInputPaths(conf, new Path(args[0]));
     FileOutputFormat.setOutputPath(conf, new Path(args[1]));
