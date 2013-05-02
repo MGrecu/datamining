@@ -32,8 +32,8 @@ public class PSGD {
    */
   public static class Reduce extends MapReduceBase implements Reducer<LongWritable, Text, NullWritable, Text> {
 	final static double LEARNING_RATE = 0.9;
-	final static double LAMBDA = 0.0001;
-	final static int EPOCHS = 1;
+	final static double LAMBDA = 0.00001;
+	final static int EPOCHS = 2;
 
 	Text outputValue = new Text();
 
@@ -42,7 +42,7 @@ public class PSGD {
      */
     public void reduce(LongWritable key, Iterator<Text> values, OutputCollector<NullWritable, Text> output, Reporter reporter) throws IOException {
 
-      List<TrainingInstance> trainingSet = new LinkedList<TrainingInstance>();
+      List<TrainingInstance> trainingSet = new ArrayList<TrainingInstance>();
 
       while (values.hasNext()) {
         String s = values.next().toString();
@@ -50,9 +50,10 @@ public class PSGD {
         trainingSet.add(instance);
       }
 
-      // SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
-      SVM model = new SVM(trainingSet, LAMBDA);
-      //SVM model = new SVM(trainingSet, LAMBDA, 15, 10);
+      //SVM model = SVM.createSVMSimpleOnline(trainingSet, LAMBDA);
+      //SVM model = SVM.createSVMBatchPegasos(trainingSet, LAMBDA, 15, 10);
+      //SVM model = SVM.createSVMSimplePegasos(trainingSet, LAMBDA, EPOCHS);
+      SVM model = SVM.createSVMSimplePegasosRandom(trainingSet, LAMBDA, EPOCHS);
 
       /**
        * null is important here since we don't want to do additional preprocessing
