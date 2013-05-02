@@ -38,18 +38,17 @@ public class SVM {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
 	  this.weights = new RealVector(dim);
 	  int t = 0;
+	  double factor = 1;
 	  
 	  for (int i=0; i<epochs; i++) {
 		  for (TrainingInstance ti: trainingSet) {
 			  t++;
-			  double factor = 1.0 - 1.0/t;
-			  double eta = 1/(lambda * t);
+			  factor = factor * (1.0 - 1.0/t);
 			  
-			  boolean result = (weights.dotProduct(ti.getFeatures()) * ti.getLabel()) >= 1;
-			  weights = weights.scaleThis(factor);
-			  
-			  if (!result) {
-				  weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
+			  if ((weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
+				  weights = weights.scaleThis(factor);
+				  weights.add(ti.getFeatures().scale((1.0/(lambda * t)) * ti.getLabel())); 
+				  factor = 1.0;
 			  }
 		  }
 	  }
