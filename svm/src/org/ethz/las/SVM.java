@@ -72,7 +72,7 @@ public class SVM {
 	  double factor = 1;
 	  double eta;
 	  
-	  int T = trainingSet.size() / minibatchSize;
+	  int T = 2 * trainingSet.size() / minibatchSize;
 	  for (int t = 1; t <= T; t++) {
 		  List<TrainingInstance> minibatch = new ArrayList<TrainingInstance>();
 
@@ -84,21 +84,16 @@ public class SVM {
 			  } while (minibatch.contains(trainingSet.get(randIndex)));
 			  minibatch.add(trainingSet.get(randIndex));
 		  }
-		  
-		  for (int i=0; i<EPOCHS; i++) {
-			  for (TrainingInstance ti : minibatch) {
-				  t++;
-
-				  if ((weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
-					  factor = tLast * 1.0 / t;
-					  eta = 1.0/(lambda * t);
-					  weights.scaleThis(factor);
-					  weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
-					  tLast = t;
-				  }
+		 
+		  for (TrainingInstance ti : minibatch) {			  
+			  if ((weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
+				  factor = tLast * 1.0 / t;
+				  eta = 1.0/(lambda * t);
+				  weights.scaleThis(factor);
+				  weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
 			  }
-		  }
-		  
+		  }		  
+		  tLast = t;
 	  }
   }
   /**
