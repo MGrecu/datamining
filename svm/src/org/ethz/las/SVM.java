@@ -4,7 +4,7 @@ import java.util.*;
 
 public class SVM {
 	
-  public static final int EPOCHS = 1;
+  public static final int EPOCHS = 2;
 
   // Hyperplane weights.
   RealVector weights;
@@ -21,8 +21,8 @@ public class SVM {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
 	  this.weights = new RealVector(dim);
 	  int t = 0;
-	  
-	  for (TrainingInstance ti: trainingSet) {
+
+	  for (TrainingInstance ti : trainingSet) {
 		  t++;
 		  if (weights.dotProduct(ti.getFeatures()) * ti.getLabel() < 1) {
 			  weights.add(ti.getFeatures().scale((1.0/Math.sqrt(t)) * ti.getLabel()));
@@ -54,6 +54,49 @@ public class SVM {
 				  tLast = t;
 			  }
 		  }
+	  }
+  }
+  
+  /**
+   * PEGASOS with Bootstrapping
+   */
+  public SVM(List<TrainingInstance> trainingSet, double lambda, int T, int minibatchSize)
+  {
+	  int dim = trainingSet.get(0).getFeatures().getDimension();
+	  this.weights = new RealVector(dim);
+	  int maxSampleIndex = trainingSet.size();
+	  
+	  for (int t = 1; t <= T; t++) {
+		  List<TrainingInstance> minibatch = new ArrayList<TrainingInstance>();
+		  
+		  // Build the minibatch!
+		  for (int sample = 0; sample < minibatchSize; ++sample) {
+			  int randIndex;
+			  // do {
+				  randIndex = (int) (Math.random() * maxSampleIndex);
+			  // } while (minibatch.contains(trainingSet.get(randIndex)));
+			  minibatch.add(trainingSet.get(randIndex));
+		  }
+		  
+		  // Compute weight adjustment value.
+		  RealVector gradient = new RealVector(dim);
+		  for (int sample = 0; sample < minibatchSize; sample++) {
+			  TrainingInstance instance = minibatch.get(sample);
+			  if (instance.getLabel() * instance.getFeatures().dotProduct(weights) < 1) {
+				  gradient.add(instance.getFeatures().scale(instance.getLabel()));
+			  }
+		  }
+
+		  // Compute eta and include it in the gradient computations.
+		  double eta = 1.0/(t*lambda*lambda);
+		  gradient.scaleThis(eta / minibatchSize);
+		  gradient.add(weights.scale(1 - eta * lambda));
+
+		  double finalScaleFactor = 1.0 / (gradient.getNorm() * lambda);
+		  if (finalScaleFactor < 1)
+			  gradient.scaleThis(finalScaleFactor);
+
+		  weights = new RealVector(gradient.w);
 	  }
   }
 

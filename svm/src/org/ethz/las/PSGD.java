@@ -32,7 +32,7 @@ public class PSGD {
    */
   public static class Reduce extends MapReduceBase implements Reducer<LongWritable, Text, NullWritable, Text> {
 	final static double LEARNING_RATE = 0.9;
-	final static double LAMBDA = 0.001;
+	final static double LAMBDA = 0.1;
 	final static int EPOCHS = 1;
 
 	Text outputValue = new Text();
@@ -50,8 +50,9 @@ public class PSGD {
         trainingSet.add(instance);
       }
 
-      //SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
-      SVM model = new SVM(trainingSet, LAMBDA);
+      // SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
+      // SVM model = new SVM(trainingSet, LAMBDA);
+      SVM model = new SVM(trainingSet, LAMBDA, 15, 10);
 
       /**
        * null is important here since we don't want to do additional preprocessing
