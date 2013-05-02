@@ -4,7 +4,7 @@ import java.util.*;
 
 public class SVM {
 	
-  public static final int EPOCHS = 2;
+  public static final int EPOCHS = 1;
 
   // Hyperplane weights.
   RealVector weights;
@@ -39,9 +39,10 @@ public class SVM {
   public SVM(List<TrainingInstance> trainingSet, double lambda) {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
 	  this.weights = new RealVector(dim);
-	  int t = 0;
+	  int t = 1;
 	  int tLast = 1;
 	  double factor = 1;
+	  double eta;
 	  
 	  for (int i=0; i<EPOCHS; i++) {
 		  for (TrainingInstance ti: trainingSet) {
@@ -49,8 +50,9 @@ public class SVM {
 
 			  if ((weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
 				  factor = tLast * 1.0 / t;
-				  weights = weights.scaleThis(factor);
-				  weights.add(ti.getFeatures().scale((1.0/(lambda * t)) * ti.getLabel())); 
+				  eta = 1.0/(lambda * t);
+				  weights.scaleThis(factor);
+				  weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
 				  tLast = t;
 			  }
 		  }
