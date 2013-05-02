@@ -88,11 +88,11 @@ public class SVM {
 		  }
 
 		  // Compute eta and include it in the gradient computations.
-		  double eta = 1.0/(t*lambda*lambda);
+		  double eta = 1.0/(t*lambda);
 		  gradient.scaleThis(eta / minibatchSize);
-		  gradient.add(weights.scale(1 - eta * lambda));
+		  gradient.add(weights.scale(1 - eta * Math.sqrt(lambda)));
 
-		  double finalScaleFactor = 1.0 / (gradient.getNorm() * lambda);
+		  double finalScaleFactor = 1.0 / (gradient.getNorm() * Math.sqrt(lambda));
 		  if (finalScaleFactor < 1)
 			  gradient.scaleThis(finalScaleFactor);
 

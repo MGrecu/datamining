@@ -32,7 +32,7 @@ public class PSGD {
    */
   public static class Reduce extends MapReduceBase implements Reducer<LongWritable, Text, NullWritable, Text> {
 	final static double LEARNING_RATE = 0.9;
-	final static double LAMBDA = 0.1;
+	final static double LAMBDA = 0.0001;
 	final static int EPOCHS = 1;
 
 	Text outputValue = new Text();
