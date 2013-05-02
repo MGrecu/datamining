@@ -30,6 +30,30 @@ public class SVM {
 		  }
 	  }
   }
+  
+  /**
+   * Simple PEGASOS, found here: http://bickson.blogspot.ch/2012/04/more-on-large-scale-svm.html
+   */
+  public SVM(List<TrainingInstance> trainingSet, double lambda, int epochs) {
+	  int dim = trainingSet.get(0).getFeatures().getDimension();
+	  this.weights = new RealVector(dim);
+	  int t = 0;
+	  
+	  for (int i=0; i<epochs; i++) {
+		  for (TrainingInstance ti: trainingSet) {
+			  t++;
+			  double factor = 1.0 - 1.0/t;
+			  double eta = 1/(lambda * t);
+			  
+			  boolean result = (weights.dotProduct(ti.getFeatures()) * ti.getLabel()) >= 1;
+			  weights = weights.scaleThis(factor);
+			  
+			  if (!result) {
+				  weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
+			  }
+		  }
+	  }
+  }
 
   /**
    * Instantiates SVM from weights given as a string.

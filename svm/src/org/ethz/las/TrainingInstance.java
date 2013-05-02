@@ -30,6 +30,8 @@ class TrainingInstance {
     // Gets all tokens.
     while (sc.hasNextDouble())
       parsedInput.add(sc.nextDouble());
+    
+    sc.close();
 
     // Last element is always the label.
     int n = parsedInput.size() - 1;

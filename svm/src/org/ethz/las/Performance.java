@@ -43,6 +43,8 @@ public class Performance {
       if (cnt % 1000 == 0) printStats(TP, FN, FP, TN);
       cnt ++;
     }
+    
+    br.close();
   }
 
   /**
