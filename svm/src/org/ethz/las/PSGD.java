@@ -51,8 +51,8 @@ public class PSGD {
       }
 
       // SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
-      SVM model = new SVM(trainingSet, LAMBDA);
-      //SVM model = new SVM(trainingSet, LAMBDA, 15, 10);
+      // SVM model = new SVM(trainingSet, LAMBDA);
+      SVM model = new SVM(trainingSet, LAMBDA, (int) trainingSet.size() / 1000);
 
       /**
        * null is important here since we don't want to do additional preprocessing

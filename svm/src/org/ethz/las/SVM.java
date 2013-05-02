@@ -38,7 +38,7 @@ public class SVM {
    */
   public SVM(List<TrainingInstance> trainingSet, double lambda) {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
-	  this.weights = new RealVector(dim);
+
 	  int t = 1;
 	  int tLast = 1;
 	  double factor = 1;
@@ -60,7 +60,49 @@ public class SVM {
   }
   
   /**
-   * PEGASOS with Bootstrapping
+   * PEGASOS with bootstrapping over existing algorithm.
+   */
+  public SVM(List<TrainingInstance> trainingSet, double lambda, int minibatchSize)
+  {
+	  int dim = trainingSet.get(0).getFeatures().getDimension();
+	  this.weights = new RealVector(dim);
+	  int maxSampleIndex = trainingSet.size();
+	  
+	  int tLast = 1;
+	  double factor = 1;
+	  double eta;
+	  
+	  int T = trainingSet.size() / minibatchSize;
+	  for (int t = 1; t <= T; t++) {
+		  List<TrainingInstance> minibatch = new ArrayList<TrainingInstance>();
+
+		  // Build the minibatch!
+		  for (int sample = 0; sample < minibatchSize; ++sample) {
+			  int randIndex;
+			  do {
+				  randIndex = (int) (Math.random() * maxSampleIndex);
+			  } while (minibatch.contains(trainingSet.get(randIndex)));
+			  minibatch.add(trainingSet.get(randIndex));
+		  }
+		  
+		  for (int i=0; i<EPOCHS; i++) {
+			  for (TrainingInstance ti : minibatch) {
+				  t++;
+
+				  if ((weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
+					  factor = tLast * 1.0 / t;
+					  eta = 1.0/(lambda * t);
+					  weights.scaleThis(factor);
+					  weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
+					  tLast = t;
+				  }
+			  }
+		  }
+		  
+	  }
+  }
+  /**
+   * PEGASOS with Bootstrapping as in the paper
    */
   public SVM(List<TrainingInstance> trainingSet, double lambda, int T, int minibatchSize)
   {
@@ -70,7 +112,7 @@ public class SVM {
 	  
 	  for (int t = 1; t <= T; t++) {
 		  List<TrainingInstance> minibatch = new ArrayList<TrainingInstance>();
-		  
+
 		  // Build the minibatch!
 		  for (int sample = 0; sample < minibatchSize; ++sample) {
 			  int randIndex;
