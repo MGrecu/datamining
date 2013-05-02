@@ -4,8 +4,6 @@ import java.util.*;
 
 public class SVM {
 	
-  public static final int EPOCHS = 1;
-
   // Hyperplane weights.
   RealVector weights;
 
@@ -17,46 +15,80 @@ public class SVM {
    * Instantiates an SVM from a list of training instances, for a given
    * learning rate 'eta' and regularization parameter 'lambda'.
    */
-  public SVM(List<TrainingInstance> trainingSet, double eta, double lambda) {
+  public static SVM createSVMSimpleOnline(List<TrainingInstance> trainingSet, double lambda) {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
-	  this.weights = new RealVector(dim);
+	  SVM svm = new SVM(new RealVector(dim));
 	  int t = 0;
 
 	  for (TrainingInstance ti : trainingSet) {
 		  t++;
-		  if (weights.dotProduct(ti.getFeatures()) * ti.getLabel() < 1) {
-			  weights.add(ti.getFeatures().scale((1.0/Math.sqrt(t)) * ti.getLabel()));
-			  //weights.add(ti.getFeatures().scale(eta * ti.getLabel()));
-			  double factor = Math.min(1.0, 1.0 / (weights.getNorm() * lambda));
-			  weights.scaleThis(factor);
+		  if (svm.weights.dotProduct(ti.getFeatures()) * ti.getLabel() < 1) {
+			  svm.weights.add(ti.getFeatures().scale((1.0/Math.sqrt(t)) * ti.getLabel()));
+			  double factor = Math.min(1.0, 1.0 / (svm.weights.getNorm() * lambda));
+			  svm.weights.scaleThis(factor);
 		  }
 	  }
+	  
+	  return svm;
   }
   
   /**
    * Simple PEGASOS, found here: http://bickson.blogspot.ch/2012/04/more-on-large-scale-svm.html
    */
-  public SVM(List<TrainingInstance> trainingSet, double lambda) {
+  public static SVM createSVMSimplePegasos(List<TrainingInstance> trainingSet, double lambda, double epochs) {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
+	  SVM svm = new SVM(new RealVector(dim));
 
-	  int t = 1;
+      int t = 1;
 	  int tLast = 1;
 	  double factor = 1;
 	  double eta;
 	  
-	  for (int i=0; i<EPOCHS; i++) {
+	  for (int i=0; i<epochs; i++) {
 		  for (TrainingInstance ti: trainingSet) {
 			  t++;
 
-			  if ((weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
+			  if ((svm.weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
 				  factor = tLast * 1.0 / t;
 				  eta = 1.0/(lambda * t);
-				  weights.scaleThis(factor);
-				  weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
+				  svm.weights.scaleThis(factor);
+				  svm.weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
 				  tLast = t;
 			  }
 		  }
 	  }
+	  
+	  return svm;
+  }
+  
+  /**
+   * Simple PEGASOS, with random sampling at each step
+   */
+  public static SVM createSVMSimplePegasosRandom(List<TrainingInstance> trainingSet, double lambda, int epochs) {
+	  int dim = trainingSet.get(0).getFeatures().getDimension();
+	  SVM svm = new SVM(new RealVector(dim));
+	  int t = 1;
+	  int tLast = 1;
+	  double factor = 1;
+	  double eta;
+	  int S = trainingSet.size();
+	  int T = S * epochs;
+	  
+	  for (int i=0; i<T; i++) {
+		  Random randomGen = new Random();
+		  TrainingInstance ti = trainingSet.get(randomGen.nextInt(S));
+		  t++;
+
+		  if ((svm.weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
+			  factor = tLast * 1.0 / t;
+			  eta = 1.0/(lambda * t);
+			  svm.weights.scaleThis(factor);
+			  svm.weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
+			  tLast = t;
+		  }
+	  }
+	  
+	  return svm;
   }
   
   /**
@@ -99,10 +131,10 @@ public class SVM {
   /**
    * PEGASOS with Bootstrapping as in the paper
    */
-  public SVM(List<TrainingInstance> trainingSet, double lambda, int T, int minibatchSize)
+  public static SVM createSVMBatchPegasos(List<TrainingInstance> trainingSet, double lambda, int T, int minibatchSize)
   {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
-	  this.weights = new RealVector(dim);
+	  SVM svm = new SVM(new RealVector(dim));
 	  int maxSampleIndex = trainingSet.size();
 	  
 	  for (int t = 1; t <= T; t++) {
@@ -121,7 +153,7 @@ public class SVM {
 		  RealVector gradient = new RealVector(dim);
 		  for (int sample = 0; sample < minibatchSize; sample++) {
 			  TrainingInstance instance = minibatch.get(sample);
-			  if (instance.getLabel() * instance.getFeatures().dotProduct(weights) < 1) {
+			  if (instance.getLabel() * instance.getFeatures().dotProduct(svm.weights) < 1) {
 				  gradient.add(instance.getFeatures().scale(instance.getLabel()));
 			  }
 		  }
@@ -129,14 +161,16 @@ public class SVM {
 		  // Compute eta and include it in the gradient computations.
 		  double eta = 1.0/(t*lambda);
 		  gradient.scaleThis(eta / minibatchSize);
-		  gradient.add(weights.scale(1 - eta * Math.sqrt(lambda)));
+		  gradient.add(svm.weights.scale(1 - eta * Math.sqrt(lambda)));
 
 		  double finalScaleFactor = 1.0 / (gradient.getNorm() * Math.sqrt(lambda));
 		  if (finalScaleFactor < 1)
 			  gradient.scaleThis(finalScaleFactor);
 
-		  weights = new RealVector(gradient.w);
+		  svm.weights = new RealVector(gradient.w);
 	  }
+	  
+	  return svm;
   }
 
   /**
