@@ -9,7 +9,7 @@ import java.util.*;
 
 public class PSGD {
 
-  public static final int K = 20;
+  public static final int K = 40;
 	
   /**
    * The Map class has to make sure that the data is shuffled to the various machines.
@@ -52,12 +52,13 @@ public class PSGD {
 
       // SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
       // SVM model = new SVM(trainingSet, LAMBDA);
-      SVM model = new SVM(trainingSet, LAMBDA, (int) trainingSet.size() / 100);
+      //SVM model = new SVM(trainingSet, LAMBDA, (int) trainingSet.size() / 100);
 
 	  //SVM model = SVM.createSVMSimpleOnline(trainingSet, LAMBDA);
       //SVM model = SVM.createSVMBatchPegasos(trainingSet, LAMBDA, 15, 10);
       //SVM model = SVM.createSVMSimplePegasos(trainingSet, LAMBDA, EPOCHS);
 	  //SVM model = SVM.createSVMSimplePegasosRandom(trainingSet, LAMBDA, EPOCHS);
+      SVM model = SVM.createSVMSimplePegasosShuffle(trainingSet, LAMBDA, EPOCHS);
 
       /**
        * null is important here since we don't want to do additional preprocessing
