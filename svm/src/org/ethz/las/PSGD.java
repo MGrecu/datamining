@@ -52,12 +52,12 @@ public class PSGD {
 
       // SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
       // SVM model = new SVM(trainingSet, LAMBDA);
-      SVM model = new SVM(trainingSet, LAMBDA, (int) trainingSet.size() / 100);
+      SVM model = new SVM(trainingSet, LAMBDA, Math.min(10000, (int) trainingSet.size() / 100), 10);
 
 	  //SVM model = SVM.createSVMSimpleOnline(trainingSet, LAMBDA);
       //SVM model = SVM.createSVMBatchPegasos(trainingSet, LAMBDA, 15, 10);
       //SVM model = SVM.createSVMSimplePegasos(trainingSet, LAMBDA, EPOCHS);
-	  //SVM model = SVM.createSVMSimplePegasosRandom(trainingSet, LAMBDA, EPOCHS);
+	  // SVM model = SVM.createSVMSimplePegasosRandom(trainingSet, LAMBDA, EPOCHS);
 
       /**
        * null is important here since we don't want to do additional preprocessing

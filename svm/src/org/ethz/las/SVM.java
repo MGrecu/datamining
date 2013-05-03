@@ -94,7 +94,7 @@ public class SVM {
   /**
    * PEGASOS with bootstrapping over existing algorithm.
    */
-  public SVM(List<TrainingInstance> trainingSet, double lambda, int minibatchSize)
+  public SVM(List<TrainingInstance> trainingSet, double lambda, int minibatchSize, int epochs)
   {
 	  int dim = trainingSet.get(0).getFeatures().getDimension();
 	  this.weights = new RealVector(dim);
@@ -104,7 +104,7 @@ public class SVM {
 	  double factor = 1;
 	  double eta;
 	  
-	  int T = 2 * trainingSet.size() / minibatchSize;
+	  int T = 1 + (int) (Math.random() * epochs);
 	  for (int t = 1; t <= T; t++) {
 		  List<TrainingInstance> minibatch = new ArrayList<TrainingInstance>();
 
