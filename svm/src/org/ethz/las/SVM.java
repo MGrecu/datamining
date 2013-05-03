@@ -71,12 +71,22 @@ public class SVM {
 	  int tLast = 1;
 	  double factor = 1;
 	  double eta;
-	  int S = trainingSet.size();
-	  int T = S * epochs;
+	  int N = trainingSet.size();
+	  int T = N * epochs;
+	  int maxSampling = epochs * 2;
+	  int[] counts = new int[N];
 	  
 	  for (int i=0; i<T; i++) {
-		  Random randomGen = new Random();
-		  TrainingInstance ti = trainingSet.get(randomGen.nextInt(S));
+		  Random randomGen = new Random(123456);
+		  int pos = 0;
+		  
+		  do {
+			  pos = randomGen.nextInt(N);
+		  } 
+		  while (counts[pos] >= maxSampling);
+		  
+		  counts[pos]++;
+		  TrainingInstance ti = trainingSet.get(pos);
 		  t++;
 
 		  if ((svm.weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
@@ -85,6 +95,39 @@ public class SVM {
 			  svm.weights.scaleThis(factor);
 			  svm.weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
 			  tLast = t;
+		  }
+	  }
+	  
+	  return svm;
+  }
+  
+  /**
+   * Simple PEGASOS, with list shuffling
+   */
+  public static SVM createSVMSimplePegasosShuffle(List<TrainingInstance> trainingSet, double lambda, int epochs) {
+	  int dim = trainingSet.get(0).getFeatures().getDimension();
+	  SVM svm = new SVM(new RealVector(dim));
+	  int t = 1;
+	  int tLast = 1;
+	  double factor = 1;
+	  double eta;
+	  
+	  Random randomGen = new Random(123456);
+	  
+	  for (int i=0; i<epochs; i++) {
+		  
+		  Collections.shuffle(trainingSet, randomGen);
+
+		  for (TrainingInstance ti: trainingSet) {
+			  t++;
+	
+			  if ((svm.weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
+				  factor = tLast * 1.0 / t;
+				  eta = 1.0/(lambda * t);
+				  svm.weights.scaleThis(factor);
+				  svm.weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
+				  tLast = t;
+			  }
 		  }
 	  }
 	  
