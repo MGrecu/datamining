@@ -20,9 +20,7 @@ public class PSGD {
      * Spread the data around on K different machines.
      */
     public void map(LongWritable key, Text value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
-    	
     	long bucket = Math.abs(value.toString().hashCode()) % K;
-    	
     	output.collect(new LongWritable(bucket), value);
     }
   }
@@ -52,14 +50,18 @@ public class PSGD {
 
       // SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
       // SVM model = new SVM(trainingSet, LAMBDA);
-//      SVM model = new SVM(trainingSet, LAMBDA, Math.min(10000, (int) trainingSet.size() / 100), 10);
+      // SVM model = new SVM(trainingSet, LAMBDA, Math.min(10000, (int) trainingSet.size() / 100), 10);
 
-	  //SVM model = SVM.createSVMSimpleOnline(trainingSet, LAMBDA);
-      //SVM model = SVM.createSVMBatchPegasos(trainingSet, LAMBDA, 15, 10);
-      //SVM model = SVM.createSVMSimplePegasos(trainingSet, LAMBDA, EPOCHS);
-	  //SVM model = SVM.createSVMSimplePegasosRandom(trainingSet, LAMBDA, EPOCHS);
-      SVM model = SVM.createSVMSimplePegasosShuffle(trainingSet, LAMBDA, EPOCHS);
+	  // SVM model = SVM.createSVMSimpleOnline(trainingSet, LAMBDA);
+      // SVM model = SVM.createSVMBatchPegasos(trainingSet, LAMBDA, 15, 10);
+      // SVM model = SVM.createSVMSimplePegasos(trainingSet, LAMBDA, EPOCHS);
+	  // SVM model = SVM.createSVMSimplePegasosRandom(trainingSet, LAMBDA, EPOCHS);
+      // SVM model = SVM.createSVMROMMAShuffle(trainingSet, LAMBDA, EPOCHS);
+	  // SVM model = SVM.createSVMPairwisePegasosRandom(trainingSet, LAMBDA, EPOCHS);
+      SVM model = SVM.createSVMSimplePegasosBalanced(trainingSet, LAMBDA);
 
+      // SVM model = SVM.createSVMPegasosMinibatch(trainingSet, 150, LAMBDA, trainingSet.size() / 200);
+      
       /**
        * null is important here since we don't want to do additional preprocessing
        * to remove the key. The value should be the SVM model (take a look at method
