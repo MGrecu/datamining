@@ -64,42 +64,52 @@ public class SVM {
   /**
    * Simple PEGASOS, with random sampling at each step
    */
-  public static SVM createSVMSimplePegasosRandom(List<TrainingInstance> trainingSet, double lambda, int epochs) {
-	  int dim = trainingSet.get(0).getFeatures().getDimension();
-	  SVM svm = new SVM(new RealVector(dim));
-	  int t = 1;
-	  int tLast = 1;
-	  double factor = 1;
-	  double eta;
-	  int N = trainingSet.size();
-	  int T = N * epochs;
-	  int maxSampling = epochs * 2;
-	  int[] counts = new int[N];
-	  
-	  for (int i=0; i<T; i++) {
-		  Random randomGen = new Random(123456);
-		  int pos = 0;
-		  
-		  do {
-			  pos = randomGen.nextInt(N);
-		  } 
-		  while (counts[pos] >= maxSampling);
-		  
-		  counts[pos]++;
-		  TrainingInstance ti = trainingSet.get(pos);
-		  t++;
-
-		  if ((svm.weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
-			  factor = tLast * 1.0 / t;
-			  eta = 1.0/(lambda * t);
-			  svm.weights.scaleThis(factor);
-			  svm.weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
-			  tLast = t;
-		  }
-	  }
-	  
-	  return svm;
-  }
+//  public static SVM createSVMSimplePegasosRandom(List<TrainingInstance> trainingSet, double lambda, int epochs) {
+//	  int dim = trainingSet.get(0).getFeatures().getDimension();
+//	  SVM svm = new SVM(new RealVector(dim));
+//	  int t = 1;
+//	  int tLast = 1;
+//	  double factor = 1;
+//	  double eta;
+//	  int N = trainingSet.size();
+//	  int T = N * epochs;
+//	  int maxSampling = epochs + 1;
+//	  int[] counts = new int[N];
+//	  double fpBias = 2;
+//	  
+//	  Random randomGen = new Random(123456);
+//	  
+//	  for (int i=0; i<T; i++) {
+//		  int pos = 0;
+//		  
+//		  do {
+//			  pos = randomGen.nextInt(N);
+//		  } 
+//		  while (counts[pos] >= maxSampling);
+//		  
+//		  counts[pos]++;
+//		  TrainingInstance ti = trainingSet.get(pos);
+//		  t++;
+//
+//		  if ((svm.weights.dotProduct(ti.getFeatures()) * ti.getLabel()) < 1) {
+//			  factor = tLast * 1.0 / t;
+//			  eta = 1.0/(lambda * t);
+//			  svm.weights.scaleThis(factor);
+//			  
+//			  if (ti.getLabel() == -1) {
+//				  fpBias = 2;
+//			  }
+//			  else {
+//				  fpBias = 1.5;
+//			  }
+//			  
+//			  svm.weights.add(ti.getFeatures().scale(fpBias * eta * ti.getLabel())); 
+//			  tLast = t;
+//		  }
+//	  }
+//	  
+//	  return svm;
+//  }
   
   /**
    * Simple PEGASOS, with list shuffling
@@ -111,8 +121,9 @@ public class SVM {
 	  int tLast = 1;
 	  double factor = 1;
 	  double eta;
+	  double fpBias = 2;
 	  
-	  Random randomGen = new Random(123456);
+	  Random randomGen = new Random(12345);
 	  
 	  for (int i=0; i<epochs; i++) {
 		  
@@ -125,11 +136,21 @@ public class SVM {
 				  factor = tLast * 1.0 / t;
 				  eta = 1.0/(lambda * t);
 				  svm.weights.scaleThis(factor);
-				  svm.weights.add(ti.getFeatures().scale(eta * ti.getLabel())); 
+				  
+				  if (ti.getLabel() == -1) {
+					  fpBias = 3;
+				  }
+				  else {
+					  fpBias = 1.5;
+				  }
+				  
+				  svm.weights.add(ti.getFeatures().scale(fpBias * eta * ti.getLabel()));
 				  tLast = t;
 			  }
 		  }
 	  }
+	  
+	  //svm.weights.scaleThis(1.0 / svm.weights.getNorm());
 	  
 	  return svm;
   }
@@ -253,11 +274,8 @@ public class SVM {
    * Given a training instance it returns the result of sign(weights'instanceFeatures).
    */
   public int classify(TrainingInstance ti) {
-    @SuppressWarnings("unused")
-	RealVector features = ti.getFeatures();
-
     double result = ti.getFeatures().dotProduct(this.weights);
-    if (result >= 0) return 1;
+    if (result > 0) return 1;
     else return -1;
   }
 

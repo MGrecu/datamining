@@ -9,7 +9,7 @@ import java.util.*;
 
 public class PSGD {
 
-  public static final int K = 40;
+  public static final int K = 120;
 	
   /**
    * The Map class has to make sure that the data is shuffled to the various machines.
@@ -32,8 +32,8 @@ public class PSGD {
    */
   public static class Reduce extends MapReduceBase implements Reducer<LongWritable, Text, NullWritable, Text> {
 	final static double LEARNING_RATE = 0.9;
-	final static double LAMBDA = 0.00001;
-	final static int EPOCHS = 2;
+	final static double LAMBDA = 0.000005;
+	final static int EPOCHS = 1;
 
 	Text outputValue = new Text();
 
@@ -49,10 +49,6 @@ public class PSGD {
         TrainingInstance instance = new TrainingInstance(s);
         trainingSet.add(instance);
       }
-
-      // SVM model = new SVM(trainingSet, LEARNING_RATE, LAMBDA);
-      // SVM model = new SVM(trainingSet, LAMBDA);
-      //SVM model = new SVM(trainingSet, LAMBDA, (int) trainingSet.size() / 100);
 
 	  //SVM model = SVM.createSVMSimpleOnline(trainingSet, LAMBDA);
       //SVM model = SVM.createSVMBatchPegasos(trainingSet, LAMBDA, 15, 10);
