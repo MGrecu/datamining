@@ -1,0 +1,44 @@
+<project default="run">
+
+	<property name="jarFile" value="Bandit.jar" />
+
+	<path id="classpath">
+		<fileset dir="lib" includes="**/*.jar" />
+	</path>
+
+	<target name="clean">
+		<delete dir="bin" />
+		<delete dir="${jarFile}" />
+	</target>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="bin" />
+		<javac srcdir="src" destdir="bin" includeantruntime="false" classpathref="classpath" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="${jarFile}" basedir="bin" excludes="org/ethz/las/**">
+			<restrict>
+				<name name="**/*.class" />
+				<archives>
+					<zips>
+						<fileset dir="lib" includes="**/*.jar" />
+					</zips>
+				</archives>
+			</restrict>
+      <manifest>
+        <attribute name="Main-Class" value="Main"/>
+      </manifest>
+		</jar>
+	</target>
+
+	<target name="run" depends="compile">
+		<java dir="bin" classname="org.ethz.las.bandit.Main" fork="true">
+			<classpath>
+				<path refid="classpath" />
+				<path location="bin" />
+			</classpath>
+		</java>
+	</target>
+
+</project>
