@@ -2,7 +2,6 @@ package myPolicy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 
 import org.ethz.las.bandit.logs.yahoo.Article;
@@ -26,7 +25,7 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 	private int d = 6;
 	private int k = 6;
 	
-	private static final double alpha = 100;
+	private static final double alpha = 3;
 	
 	// Here you can load the article features.
 	public LinUCBHybrid(String articleFilePath) {
@@ -65,10 +64,10 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   			A.put(id, DoubleMatrix.eye(d));
   			b.put(id, DoubleMatrix.zeros(d, 1));
   			B.put(id, DoubleMatrix.zeros(d, k));
-  			counterMap.put(id, 1);
+  			counterMap.put(id, 0);
 		}
 		
-		// k = z.values().iterator().next().getRows();
+		sc.close();
 	}
   	@Override
     public Article getActionToPerform(User visitor, List<Article> possibleActions) {
@@ -83,7 +82,9 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 
   		for (Article a: possibleActions) {
   			int count = counterMap.get(a.getID());
-  			if (count < 10 || Math.random() > .99) {
+  			
+  			if (count <= 20 || Math.random() > .98) {
+  				
   	  			DoubleMatrix Ba = B.get(a.getID());
   	  			DoubleMatrix BaT = Ba.transpose();
 
@@ -111,6 +112,7 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 
   	@Override
     public void updatePolicy(User c, Article a, Boolean reward) {
+  		
   		counterMap.put(a.getID(), counterMap.get(a.getID())+1);
 
   		DoubleMatrix Aa = A.get(a.getID());
@@ -143,6 +145,5 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   		A0.addi(za.mmul(za.transpose())).subi(BaTpinvAa.mmul(Ba));
   		b0.subi(BaTpinvAa.mmul(ba));
   		/* COEFF END */
-  		
   	}
 }
