@@ -13,7 +13,7 @@ import myPolicy.MyPolicy;
 
 public class Main {
 
-	private static final String DATA_FOLDER = "/home/vcarbune/work/ETH/dm/project/bandit/";
+	private static final String DATA_FOLDER = "/Users/mircea/Documents/Master/DM/datamining/bandit/";
 	
 	public static void main(String[] args) throws Exception {
 
