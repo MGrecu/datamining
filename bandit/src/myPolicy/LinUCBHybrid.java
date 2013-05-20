@@ -35,7 +35,9 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 	private int d = 6;
 	private int k = 6;
 	
-	private static final double alpha = 100;
+	private static final double alpha = 1;
+	
+	private static final double MAX_COUNT = 20000.0;
 	
 	// Here you can load the article features.
 	public LinUCBHybrid(String articleFilePath) {
@@ -104,28 +106,28 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   		DoubleMatrix xT = x.transpose();
 
   		for (Article a: possibleActions) {
-  			//int count = counterMap.get(a.getID());
   			
   			int id = a.getID();
   			
-  			if (true) {
+//  			int count = counterMap.get(id);
+//  			double ageFactor = Math.max((MAX_COUNT - count) / MAX_COUNT, 0.2); // not working well
+  			
+  			DoubleMatrix zta = z.get(id);
+  			DoubleMatrix ztaT = zta.transpose();
+  			DoubleMatrix invAa = invA.get(id);
+
+			double sta = ztaT.mmul(invA0).mmul(zta).get(0, 0) -
+					2 * ztaT.mmul(invA0_BT_invA.get(id)).mmul(x).get(0, 0) +
+					xT.mmul(invAa).mmul(x).get(0, 0) +
+					xT.mmul(invA_B_invA0_BT_invA.get(id)).mmul(x).get(0, 0);
+
+//  				double p = ztaT.mmul(beta).get(0, 0) + xT.mmul(theta.get(id)).get(0, 0) + ageFactor * alpha * Math.sqrt(sta);
+			double p = ztaT.mmul(beta).get(0, 0) + xT.mmul(theta.get(id)).get(0, 0) + alpha * Math.sqrt(sta);
   				
-  	  			DoubleMatrix zta = z.get(id);
-  	  			DoubleMatrix ztaT = zta.transpose();
-  	  			DoubleMatrix invAa = invA.get(id);
-
-  				double sta = ztaT.mmul(invA0).mmul(zta).get(0, 0) -
-  						2 * ztaT.mmul(invA0_BT_invA.get(id)).mmul(x).get(0, 0) +
-  						xT.mmul(invAa).mmul(x).get(0, 0) +
-  						xT.mmul(invA_B_invA0_BT_invA.get(id)).mmul(x).get(0, 0);
-
-  				double p = ztaT.mmul(beta).get(0, 0) + xT.mmul(theta.get(id)).get(0, 0) + alpha * Math.sqrt(sta);
-
-  				if (p > maxP) {
-  					maxP = p;
-  					maxArt = a;
-  				}
-  			}
+			if (p > maxP) {
+				maxP = p;
+				maxArt = a;
+			}
   		}
   		
   		return maxArt;
@@ -154,11 +156,10 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   		
   		Aa.addi(x.mmul(x.transpose()));
   		Ba.addi(x.mmul(za.transpose()));
+  		/* COEFF END */
   		
   		DoubleMatrix invAa = Solve.pinv(Aa);
-  		
   		invA.put(id, invAa);
-  		/* COEFF END */
   		
   		BaT = Ba.transpose();
   		BaT_invAa = BaT.mmul(invAa);
