@@ -20,6 +20,8 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 	private HashMap<Integer, DoubleMatrix> z;
 	
 	private Map<Integer, DoubleMatrix> invA;
+	private Map<Integer, DoubleMatrix> invA0_BT_invA;
+	private Map<Integer, DoubleMatrix> invA_B_invA0_BT_invA;
 	
 	DoubleMatrix A0;
 	DoubleMatrix b0;
@@ -36,12 +38,16 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 		A = new HashMap<>();
 		B = new HashMap<>();
 		b = new HashMap<>();
-		A0 = DoubleMatrix.eye(k);
-		invA0 = DoubleMatrix.eye(k);
-		b0 = DoubleMatrix.zeros(k, 1);
 		z = new HashMap<>();
 		
+		A0 = DoubleMatrix.eye(k);
+		invA0 = DoubleMatrix.eye(k);
+		
+		b0 = DoubleMatrix.zeros(k, 1);
+		
 		invA = new HashMap<>();
+		invA0_BT_invA = new HashMap<>();
+		invA_B_invA0_BT_invA = new HashMap<>();
 		
 		counterMap = new HashMap<>();
 
@@ -74,6 +80,8 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   			counterMap.put(id, 0);
   			
   			invA.put(id, DoubleMatrix.eye(d));
+  			invA0_BT_invA.put(id, DoubleMatrix.zeros(k, d));
+  			invA_B_invA0_BT_invA.put(id, DoubleMatrix.zeros(d, d));
 		}
 		
 		sc.close();
@@ -91,10 +99,9 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   		for (Article a: possibleActions) {
   			int count = counterMap.get(a.getID());
   			
-  			if (count <= 40 || Math.random() > .90) {
+  			if (count <= 100 || Math.random() > .90) {
   				
   	  			DoubleMatrix Ba = B.get(a.getID());
-  	  			DoubleMatrix BaT = Ba.transpose();
 
   	  			DoubleMatrix zta = z.get(a.getID());
   	  			DoubleMatrix ztaT = zta.transpose();
@@ -102,9 +109,9 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   				DoubleMatrix theta = invAa.mmul(b.get(a.getID()).sub(Ba.mmul(beta)));
 
   				double sta = ztaT.mmul(invA0).mmul(zta).get(0, 0) -
-  						2 * ztaT.mmul(invA0).mmul(BaT).mmul(invAa).mmul(x).get(0, 0) +
+  						2 * ztaT.mmul(invA0_BT_invA.get(a.getID())).mmul(x).get(0, 0) +
   						xT.mmul(invAa).mmul(x).get(0, 0) +
-  						xT.mmul(invAa).mmul(Ba).mmul(invA0).mmul(BaT).mmul(invAa).mmul(x).get(0, 0);
+  						xT.mmul(invA_B_invA0_BT_invA.get(a.getID())).mmul(x).get(0, 0);
 
   				double p = ztaT.mmul(beta).get(0, 0) + xT.mmul(theta).get(0, 0) + alpha * Math.sqrt(sta);
 
@@ -128,23 +135,25 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   		DoubleMatrix BaT = Ba.transpose();
 
   		DoubleMatrix ba = b.get(a.getID());
-  		DoubleMatrix BaTpinvAa = BaT.mmul(Solve.pinv(Aa));
+  		DoubleMatrix BaT_invAa = BaT.mmul(invA.get(a.getID()));
   	
   		DoubleMatrix x = new DoubleMatrix(c.getFeatures());
   		DoubleMatrix za = z.get(a.getID());
 
   		/* COEFF START */
-  		A0.addi(BaTpinvAa.mmul(Ba));
-  		b0.addi(BaTpinvAa.mmul(ba));
+  		A0.addi(BaT_invAa.mmul(Ba));
+  		b0.addi(BaT_invAa.mmul(ba));
   		
   		Aa.addi(x.mmul(x.transpose()));
   		Ba.addi(x.mmul(za.transpose()));
   		
-  		invA.put(a.getID(), Solve.pinv(Aa));
+  		DoubleMatrix invAa = Solve.pinv(Aa);
+  		
+  		invA.put(a.getID(), invAa);
   		/* COEFF END */
   		
   		BaT = Ba.transpose();
-  		BaTpinvAa = BaT.mmul(Solve.pinv(Aa));
+  		BaT_invAa = BaT.mmul(invAa);
   		
   		/* COEFF START */
   		if (reward) {
@@ -152,10 +161,12 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   			ba.addi(x);
   		}
   	  	
-  		A0.addi(za.mmul(za.transpose())).subi(BaTpinvAa.mmul(Ba));
-  		b0.subi(BaTpinvAa.mmul(ba));
+  		A0.addi(za.mmul(za.transpose())).subi(BaT_invAa.mmul(Ba));
+  		b0.subi(BaT_invAa.mmul(ba));
   		
   		invA0 = Solve.pinv(A0);
+  		invA0_BT_invA.put(a.getID(), invA0.mmul(BaT_invAa));
+		invA_B_invA0_BT_invA.put(a.getID(), invAa.mmul(Ba).mmul(invA0_BT_invA.get(a.getID())));
   		/* COEFF END */
   	}
 }
