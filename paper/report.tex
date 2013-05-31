@@ -8,7 +8,7 @@
 \geometry{a4paper, textwidth=6.5in, textheight=10in, marginparsep=7pt, marginparwidth=.6in}
 
 \title{Data Mining 2013: Project Report}
-\author{member1@student.ethz.ch\\ member2@student.ethz.ch\\ member3@student.ethz.ch\\}
+\author{vcarbune@ethz.ch\\ mgrecu@ethz.ch}
 \date{\today}
 
 \begin{document}
@@ -18,13 +18,22 @@
 \begin{enumerate}
 \item How was your choice of rows and bands motivated? How did you search for the
 best parameters? \\ \\
-\textbf{Answer}:
+
+\textbf{Answer}: Initially, we considered to always use the maximum available number of
+hash functions. Keeping the product between rows and bands constant, we
+started by considering an equal number of rows and bands.
+
+Performances obtained have indicated that a lower number of bands yield
+better results, therefore we have continued the decrease of the bands
+until the score started decreasing.
+
+TODO(mgrecu): Results graphic.
 
 \item Conceptually, what would you have to change if you were asked to design an image
   retrieval system that you can query for similar images given a large image
   dataset? \\
 
-\textbf{Answer}:
+\textbf{Answer}: TODO(vcarbune)
 
 \end{enumerate}
 
@@ -33,11 +42,79 @@ best parameters? \\ \\
 \begin{enumerate}
 \item Which algorithms did you consider? Which one did you choose for the
   final submission and why? \\ \\
-\textbf{Answer}:
+\textbf{Answer}: We considered multiple algorithms. We started with the
+ones presented in the course and continued the implementation using
+algorithms presented in the paper "Large Scale Learning to Rank",
+written by D. Sculley from Google, Inc.
+
+We have started with the simple version of the online SVM learning
+algorithm, presented in the Data Mining course. The training samples
+were initially given sequentially to test the functionality itself, and
+after that randomly.
+
+The second step was to implement the improved version, Pegasos SVM. We
+had tested our algorithm with different values of lambdas and training
+epochs. Besides the documentation available in the course, we also used
+a set of ideas presented in a blog post \footnote{
+http://bickson.blogspot.ch/2012/04/more-on-large-scale-svm.html}
+
+We achieved good performances with Pegasos SVM, but wanted to further
+explore the field and try out several other approaches. The next
+immediate approach that seemed to yield good results was training
+minibatches, instead of one sample at a time. This approach indeed
+obtained constantly good results (without strong variations from a
+submission to another).
+
+Two aspects are relevant to consider and evaluate when talking about
+Pegasos in conjunction with minibatches: how we built the minibatch, and
+how we updated the weights. Regarding the subset construction, we have
+tried two different approaches:
+\begin{itemize}
+\item{Similar technique as bootstrap technique in Machine Learning works,
+we tried sampling uniformly at random from the initial data set in order
+to obtain a minibatch of a fixed size.}
+\item{The second approach was to ensure that the union of all minibatch
+sets is equal to the initial data set, building a complete and disjoint
+coverage}
+\end{itemize}
+
+Among these, the first one yielded slightly better results. Enforcing a
+complete and disjoint coverage of the initial set isn't a \emph{natural}
+setting of the problem, while bootstrapping, resampling with replacement
+from the initial data set, efficiently resembles the initial problems
+and optimally updates the weights.
+
+The weight update is done after an intermediate sum of the minibatch is
+computed, instead of updating it each time a new sample is encountered.
+
+Besides these algorithms, we have also implemented ROMMA, Balanced
+Pegasos (updating weights is always done by considering a positive and a
+negative example), Both of these are extensively discussed in the paper
+mentioned at the beginning, and we followed the suggestions from there,
+but performances weren't improved.
+
+For the final submission we sticked with the basic random shuffled
+Pegasos, as we obtained the best performance with it. However, on
+average, Pegasos with Minibatches yielded better results.
 
 \item How did you select the parameters for your model? Which are the
   most important parameters of your model? \\ \\
-\textbf{Answer}:
+\textbf{Answer}:  The parameters to be considered for discussion are the following:
+\begin{itemize}
+\item{\textbf{K}} The best results were obtained when using 20 machines.
+\item{\textbf{Lambda}} We tried several possibilities, varying the
+magnitude order: $10^{-6}, 10^{-5}, 10^{-4}$, etc. In the end, the best
+outcome was obtained using $10^{-4}$.
+\item{\textbf{Epochs}}
+\item{\textbf{Bias factor}} We introduced a bias factor for false
+positivies - because the cost of misclassification of a false positive is
+four times higher than that of a false negative, we decided that each
+time we encounter such a value to give an "impulse" towards the right
+direction of the parameters using the correction obtained.
+
+TODO(vcarbune): Maybe minibatches.
+
+\end{itemize}
 
 \end{enumerate}
 
@@ -47,12 +124,17 @@ best parameters? \\ \\
 \item Which algorithm did you implement? What was your motivation? \\ \\
 \textbf{Answer}:
 
+TODO(vcarbune): LinUCB, LinUCBHybrid.
+TODO(mgrecu): Keeping the whole data in memory.
+
 \item How did you select the parameters for your model? \\ \\
 \textbf{Answer}:
+TODO(mgrecu): Checked magnitude of values and coefficients such that no
+term is excluded in the final sum.
 
 \item Does the performance measured in CTR increase monotonically during the
 execution of your algorithm? Why? \\ \\
-\textbf{Answer}:
+\textbf{Answer}: No. TODO(vcarbune)
 
 \end{enumerate}
 
