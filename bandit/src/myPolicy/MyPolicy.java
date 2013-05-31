@@ -11,8 +11,8 @@ public class MyPolicy implements ContextualBanditPolicy<User, Article, Boolean> 
 	private ContextualBanditPolicy<User, Article, Boolean> policy;
 	
 	public MyPolicy(String articleFilePath) {
-		// policy = new LinUCB(articleFilePath);
-		policy = new LinUCBHybrid(articleFilePath);
+		policy = new LinUCB(articleFilePath);
+		//policy = new LinUCBHybrid(articleFilePath);
 	}
 
   	@Override

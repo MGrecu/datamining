@@ -16,14 +16,13 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 	private Map<Integer, DoubleMatrix> A;
 	private Map<Integer, DoubleMatrix> B;
 	private Map<Integer, DoubleMatrix> b;
-	private Map<Integer, Integer> counterMap;
+	private Map<Integer, Long> firstTimeMap;
 	private HashMap<Integer, DoubleMatrix> z;
 	
 	private Map<Integer, DoubleMatrix> invA;
 	private Map<Integer, DoubleMatrix> invA0_BT_invA;
 	private Map<Integer, DoubleMatrix> invA_B_invA0_BT_invA;
 	private HashMap<Integer, DoubleMatrix> theta;
-	
 	
 	DoubleMatrix A0;
 	DoubleMatrix b0;
@@ -35,9 +34,8 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 	private int d = 6;
 	private int k = 6;
 	
-	private static final double alpha = 1;
-	
-	private static final double MAX_COUNT = 20000.0;
+	private static final double alpha = 0.05;
+	private static final double timeCoeff = 0.004;
 	
 	// Here you can load the article features.
 	public LinUCBHybrid(String articleFilePath) {
@@ -58,7 +56,7 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 		invA_B_invA0_BT_invA = new HashMap<>();
 		theta = new HashMap<>();
 		
-		counterMap = new HashMap<>();
+		firstTimeMap = new HashMap<>();
 
 		readArticles(articleFilePath);
 	}
@@ -86,7 +84,6 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   			A.put(id, DoubleMatrix.eye(d));
   			b.put(id, DoubleMatrix.zeros(d, 1));
   			B.put(id, DoubleMatrix.zeros(d, k));
-  			counterMap.put(id, 0);
   			
   			invA.put(id, DoubleMatrix.eye(d));
   			invA0_BT_invA.put(id, DoubleMatrix.zeros(k, d));
@@ -104,13 +101,22 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 
   		DoubleMatrix x = new DoubleMatrix(visitor.getFeatures());
   		DoubleMatrix xT = x.transpose();
+  		
+//  		if (Math.random() <= 0.5) {
+//  			int pos = (int) (Math.random() * 20);
+//  			pos = pos % possibleActions.size();
+//  			return possibleActions.get(pos);
+//  		}
 
   		for (Article a: possibleActions) {
   			
   			int id = a.getID();
   			
-//  			int count = counterMap.get(id);
-//  			double ageFactor = Math.max((MAX_COUNT - count) / MAX_COUNT, 0.2); // not working well
+//  			if (firstTimeMap.get(id) == null) {
+//  				firstTimeMap.put(id, visitor.getTimestamp());
+//  			}
+//  			
+//  			long timeDelta = visitor.getTimestamp() - firstTimeMap.get(id);
   			
   			DoubleMatrix zta = z.get(id);
   			DoubleMatrix ztaT = zta.transpose();
@@ -121,10 +127,11 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 					xT.mmul(invAa).mmul(x).get(0, 0) +
 					xT.mmul(invA_B_invA0_BT_invA.get(id)).mmul(x).get(0, 0);
 
-//  				double p = ztaT.mmul(beta).get(0, 0) + xT.mmul(theta.get(id)).get(0, 0) + ageFactor * alpha * Math.sqrt(sta);
 			double p = ztaT.mmul(beta).get(0, 0) + xT.mmul(theta.get(id)).get(0, 0) + alpha * Math.sqrt(sta);
-  				
-			if (p > maxP) {
+			
+//			p = p - timeCoeff * Math.log10(timeDelta+1);
+			
+			if (p >= maxP) {
 				maxP = p;
 				maxArt = a;
 			}
@@ -138,8 +145,6 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   		
   		int id = a.getID();
   		
-  		counterMap.put(id, counterMap.get(id)+1);
-
   		DoubleMatrix Aa = A.get(id);
   		DoubleMatrix Ba = B.get(id);
   		DoubleMatrix BaT = Ba.transpose();
