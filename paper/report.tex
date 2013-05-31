@@ -1,53 +1,59 @@
-\documentclass[12pt,a4paper]{article}
-
+% Created 2013-01-28 Mon 22:41
+\documentclass[11pt]{article}
 \usepackage{graphicx}
-\usepackage{fullpage}
-\usepackage{listings}
-\usepackage{color}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage[pdftex]{hyperref}
+\usepackage[font=small,labelfont=bf]{caption}
+\geometry{a4paper, textwidth=6.5in, textheight=10in, marginparsep=7pt, marginparwidth=.6in}
 
-\definecolor{mygreen}{rgb}{0,0.6,0}
-\definecolor{mygray}{rgb}{0.5,0.5,0.5}
-\definecolor{mymauve}{rgb}{0.58,0,0.82}
-
-\lstset{ %
-  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
-  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
-  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
-  breaklines=true,                 % sets automatic line breaking
-  captionpos=b,                    % sets the caption-position to bottom
-  commentstyle=\color{mygreen},    % comment style
-  deletekeywords={...},            % if you want to delete keywords from the given language
-  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
-  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
-  frame=single,                    % adds a frame around the code
-  keywordstyle=\color{blue},       % keyword style
-  language=C,                       % the language of the code
-  morekeywords={*,...},            % if you want to add more keywords to the set
-  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
-  numbersep=5pt,                   % how far the line-numbers are from the code
-  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
-  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
-  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
-  showstringspaces=false,          % underline spaces within strings only
-  showtabs=false,                  % show tabs within strings adding particular underscores
-  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
-  stringstyle=\color{mymauve},     % string literal style
-  tabsize=2,                       % sets default tabsize to 2 spaces
-  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
-}
-
-\title{Data Mining Project}
-\author{Mircea Grecu (mgrecu@ethz.ch)\\Victor Carbune(vcarbune@ethz.ch)}
+\title{Data Mining 2013: Project Report}
+\author{member1@student.ethz.ch\\ member2@student.ethz.ch\\ member3@student.ethz.ch\\}
+\date{\today}
 
 \begin{document}
 \maketitle
 
-\section{Locality Sensitive Hashing}
+\section{Approximate retrieval - Locality Sensitive Hashing}
+\begin{enumerate}
+\item How was your choice of rows and bands motivated? How did you search for the
+best parameters? \\ \\
+\textbf{Answer}:
 
-\section{Support Vector Machines}
+\item Conceptually, what would you have to change if you were asked to design an image
+  retrieval system that you can query for similar images given a large image
+  dataset? \\
 
-\section{Recommender System - Bandit}
+\textbf{Answer}:
 
-\section{Conclusions}
+\end{enumerate}
+
+\section{Large-scale Supervised Learning}
+
+\begin{enumerate}
+\item Which algorithms did you consider? Which one did you choose for the
+  final submission and why? \\ \\
+\textbf{Answer}:
+
+\item How did you select the parameters for your model? Which are the
+  most important parameters of your model? \\ \\
+\textbf{Answer}:
+
+\end{enumerate}
+
+\section{Recommender Systems}
+
+\begin{enumerate}
+\item Which algorithm did you implement? What was your motivation? \\ \\
+\textbf{Answer}:
+
+\item How did you select the parameters for your model? \\ \\
+\textbf{Answer}:
+
+\item Does the performance measured in CTR increase monotonically during the
+execution of your algorithm? Why? \\ \\
+\textbf{Answer}:
+
+\end{enumerate}
 
 \end{document}
