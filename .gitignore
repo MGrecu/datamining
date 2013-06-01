@@ -4,3 +4,8 @@ bin
 .DS_Store
 .classpath
 .settings
+
+report.aux
+report.log
+report.pdf
+report.out
