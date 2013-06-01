@@ -19,8 +19,9 @@ public class LinUCB implements ContextualBanditPolicy<User, Article, Boolean> {
 	
 	private int d = 6;
 	
-	private static final double alpha = 0.05;
-	private static final double timeCoeff = 0.001;
+	private static final double alpha = 0.2;
+	private static final double timeFactorLog = 0.001;
+	private static final double timeFactor = 1e-8;
 	
 	// Here you can load the article features.
 	public LinUCB(String articleFilePath) {
@@ -45,10 +46,10 @@ public class LinUCB implements ContextualBanditPolicy<User, Article, Boolean> {
   			
   			int id = a.getID();
   			
-//  			if (firstTimeMap.get(id) == null) {
-//  				firstTimeMap.put(id, visitor.getTimestamp());
-//  			}
-//  			long timeDelta = visitor.getTimestamp() - firstTimeMap.get(id);
+  			if (firstTimeMap.get(id) == null) {
+  				firstTimeMap.put(id, visitor.getTimestamp());
+  			}
+  			long timeDelta = visitor.getTimestamp() - firstTimeMap.get(id);
   			
   			if (A.get(id) == null) {
   				A.put(id, DoubleMatrix.eye(d));
@@ -61,7 +62,8 @@ public class LinUCB implements ContextualBanditPolicy<User, Article, Boolean> {
 			double secondTerm = alpha * Math.sqrt(z.transpose().mmul(invA.get(id)).mmul(z).get(0, 0)); 
 			double p = firstTerm + secondTerm;
 			
-//			p = p - timeCoeff * Math.log10(timeDelta+1);
+			p = p - timeFactorLog * Math.log10(timeDelta+1);
+//			p = p - timeFactor * timeDelta;
 			
 			if (p > maxP) {
 				maxP = p;

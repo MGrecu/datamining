@@ -34,8 +34,8 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 	private int d = 6;
 	private int k = 6;
 	
-	private static final double alpha = 0.05;
-	private static final double timeCoeff = 0.004;
+	private static final double alpha = 0.2;
+	private static final double timeCoeff = 0.002;
 	
 	// Here you can load the article features.
 	public LinUCBHybrid(String articleFilePath) {
@@ -112,11 +112,11 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
   			
   			int id = a.getID();
   			
-//  			if (firstTimeMap.get(id) == null) {
-//  				firstTimeMap.put(id, visitor.getTimestamp());
-//  			}
-//  			
-//  			long timeDelta = visitor.getTimestamp() - firstTimeMap.get(id);
+  			if (firstTimeMap.get(id) == null) {
+  				firstTimeMap.put(id, visitor.getTimestamp());
+  			}
+  			
+  			long timeDelta = visitor.getTimestamp() - firstTimeMap.get(id);
   			
   			DoubleMatrix zta = z.get(id);
   			DoubleMatrix ztaT = zta.transpose();
@@ -129,7 +129,7 @@ public class LinUCBHybrid implements ContextualBanditPolicy<User, Article, Boole
 
 			double p = ztaT.mmul(beta).get(0, 0) + xT.mmul(theta.get(id)).get(0, 0) + alpha * Math.sqrt(sta);
 			
-//			p = p - timeCoeff * Math.log10(timeDelta+1);
+			p = p - timeCoeff * Math.log10(timeDelta+1);
 			
 			if (p >= maxP) {
 				maxP = p;
