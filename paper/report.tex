@@ -47,7 +47,14 @@ Surprisingly, we got the best score when we only used 3 bands and 12 rows.
   retrieval system that you can query for similar images given a large image
   dataset? \\
 
-\textbf{Answer}: TODO(vcarbune)
+\textbf{Answer}: First, we would have extracted patches of 8 x 8 pixels
+(standard patch size used in Computer Vision) from all the images we
+have. Instead of the k-shingles used for documents, we would have used patches
+similarly to describe images in the given collection. The next step
+would have been to cluster these and identified representative features
+for the image collection. Further, we would have applied LSH for an
+incoming image by decomposing it into its representative patches and
+used the same technique as we did for the document.
 
 \end{enumerate}
 
@@ -132,8 +139,15 @@ epochs.
 and false negatives, we tried using a bias factor around this ratio, between 1.0 and 5.0.
 The best scores were obtained with a bias factor of around 2.0.
 
-
-TODO(vcarbune): Maybe minibatches.
+Each algorithm introduced its own set of parameters, on top or instead
+of the ones mentioned above. For example mininbatches, for which we
+obtained on average very good scores (but not the best), we also tuned
+the \textbf{minibatch size} and \textbf{epochs}. Depending on the
+construction of the minibatch, usually we thought about keeping the
+product $ size * epochs $ constantly equal to the total number of
+samples (as this would increase the probability that the minibatches
+obtained through resampling with replacement would cover the complete
+initial size).
 
 \end{itemize}
 
@@ -185,7 +199,16 @@ the value of $p_{t,a}$. More specifically, it was chosen to be around 0.001 - 0.
 
 \item Does the performance measured in CTR increase monotonically during the
 execution of your algorithm? Why? \\ \\
-\textbf{Answer}: No. TODO(vcarbune)
+\textbf{Answer}: No, the performance is not increasing monotonically.
+It happens that, as more and more samples are included in our
+computations, not all of them immediately improve the results.
+Consider a sample that is not a click-through ad, but it tells us a lot
+about the preferences not relevant for CTR. We do want to take it into
+account, even if its immediate impact is to lower a bit the score.
+
+Without decreasing it the CTR might drop even more later, so it is
+important for us to take in consideration as much of the data as
+possible.
 
 \end{enumerate}
 
