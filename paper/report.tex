@@ -8,7 +8,7 @@
 \geometry{a4paper, textwidth=6.5in, textheight=10in, marginparsep=7pt, marginparwidth=.6in}
 
 \title{Data Mining 2013: Project Report}
-\author{vcarbune@ethz.ch\\ mgrecu@ethz.ch}
+\author{Victor Carbune, \emph{vcarbune@ethz.ch}\\ Mircea Grecu, \emph{mgrecu@ethz.ch} }
 \date{\today}
 
 \begin{document}
@@ -24,7 +24,7 @@ Initially, we considered to use the maximum available number of
 hash functions. We tried different combinations where the product 
 between rows and bands is close to the maximum (120).
 
-The scores obtained have indicated that a lower number of bands yield
+The scores obtained have indicated that a lower number of bands yields
 better results. Therefore we continued with testing configurations where 
 the number of bands was lower than the number of rows. 
 We also looked at cases where the product between the number of bands and
@@ -47,11 +47,12 @@ Surprisingly, we got the best score when we only used 3 bands and 12 rows.
   retrieval system that you can query for similar images given a large image
   dataset? \\
 
-\textbf{Answer}: First, we would have extracted patches of 8 x 8 pixels
+\textbf{Answer}: \\
+First, we would have extracted patches of 8 x 8 pixels
 (standard patch size used in Computer Vision) from all the images we
 have. Instead of the k-shingles used for documents, we would have used patches
 similarly to describe images in the given collection. The next step
-would have been to cluster these and identify representative features
+would have been to cluster these patches and identify representative features
 for the image collection. Further, we would have applied LSH for an
 incoming image by decomposing it into its representative patches and
 used the same technique as we did for the document.
@@ -64,8 +65,9 @@ used the same technique as we did for the document.
 \item Which algorithms did you consider? Which one did you choose for the
   final submission and why? \\
   
-\textbf{Answer}: We considered multiple algorithms. We started with the
-ones presented in the course and continued the implementation using
+\textbf{Answer}: \\
+We considered multiple algorithms. We started with the
+ones presented in the course and then we also considered using
 algorithms presented in \cite{Sculley09}.
 
 We have started with the simple version of the online SVM learning
@@ -125,7 +127,8 @@ for the movement towards the data point that was misclassified as positive.
 \item How did you select the parameters for your model? Which are the
   most important parameters of your model? \\
   
-\textbf{Answer}:  The parameters to be considered for discussion are the following:
+\textbf{Answer}: \\
+The parameters to be considered for discussion are the following:
 \begin{itemize}
 \item{\textbf{Number of machines:}} We tried different values, but we got the best scores 
 when we used either around 100 machines or around 20 machines.
@@ -140,11 +143,11 @@ and false negatives, we tried using a bias factor around this ratio, between 1.0
 The best scores were obtained with a bias factor of around 2.0.
 
 Each algorithm introduced its own set of parameters, on top or instead
-of the ones mentioned above. For example mininbatches, for which we
+of the ones mentioned above. For example, for the minibatch variant, for which we
 obtained on average very good scores (but not the best), we also tuned
 the \textbf{minibatch size} and \textbf{epochs}. Depending on the
 construction of the minibatch, usually we thought about keeping the
-product $ size * epochs $ constantly equal to the total number of
+product $ size \cdot epochs $ constantly equal to the total number of
 samples (as this would increase the probability that the minibatches
 obtained through resampling with replacement would cover the complete
 initial size).
@@ -157,9 +160,16 @@ initial size).
 
 \begin{enumerate}
 \item Which algorithm did you implement? What was your motivation? \\ \\
-\textbf{Answer}:
-
-TODO(vcarbune): LinUCB, LinUCBHybrid.
+\textbf{Answer}: \\ 
+We implemented LinUCB and LinUCB-Hybrid, because these algorithms are specifically 
+designed for such problems. In this case, the arms of the multi-armed bandit are 
+the articles and the context is characterized by the current user. 
+The performance of an article recommendation depends on the article features 
+and the user features, and these algorithms take into account these values at each step. 
+The improvement of LinUCB-Hybrid is that it captures both separate and shared effects 
+of these features. 
+Nevertheless, for this problem, LinUCB achieved slightly better results than 
+LinUCB-Hybrid, but the difference in performance between the two algorithms was minimal.
 
 
 Considering the fact that there was a limit on the execution time, we had to 
@@ -177,8 +187,8 @@ $p_{t,a} \gets p_{t,a} - c \cdot f(age_a)$,
 where $age_a$ - the age of \emph{a} in seconds.
 
 \item How did you select the parameters for your model? \\ \\
-\textbf{Answer}:
 
+\textbf{Answer}: \\
 The parameters that we could vary in both LinUCB and LinUCB-Hybrid were: 
 the constant $\alpha$, the function \emph{f} and the constant \emph{c}.
 
